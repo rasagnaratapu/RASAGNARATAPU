@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyMate - AI-Powered PDF Q&A System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .card-gradient {
+            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .upload-area {
+            border: 2px dashed #cbd5e0;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-area:hover {
+            border-color: #667eea;
+            background-color: #f7fafc;
+        }
+        
+        .chat-bubble {
+            max-width: 80%;
+            border-radius: 18px;
+            padding: 12px 16px;
+            margin: 8px 0;
+        }
+        
+        .user-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: auto;
+        }
+        
+        .ai-bubble {
+            background: #f1f5f9;
+            color: #374151;
+        }
+        
+        .typing-indicator {
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background-color: #9ca3af;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                        <i class="fas fa-graduation-cap text-purple-600 text-xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold">StudyMate</h1>
+                </div>
+                <nav class="hidden md:flex space-x-6">
+                    <a href="#" class="hover:text-purple-200 transition">Features</a>
+                    <a href="#" class="hover:text-purple-200 transition">How It Works</a>
+                    <a href="#" class="hover:text-purple-200 transition">Pricing</a>
+                </nav>
+                <button class="bg-white text-purple-600 px-4 py-2 rounded-lg font-semibold hover:bg-purple-50 transition">
+                    Get Started
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Hero Section -->
+        <section class="text-center mb-12">
+            <h2 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+                AI-Powered Study Assistant
+            </h2>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+                Upload your PDF textbooks and research papers, then ask questions to get instant, intelligent answers powered by artificial intelligence.
+            </p>
+            
+            <!-- Upload Area -->
+            <div class="max-w-2xl mx-auto mb-12">
+                <div class="card-gradient rounded-2xl p-8 upload-area" id="uploadArea">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-file-pdf text-purple-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-2">Upload Your PDF</h3>
+                        <p class="text-gray-600 mb-4">Drag and drop your PDF file here, or click to browse</p>
+                        <input type="file" id="pdfUpload" accept=".pdf" class="hidden">
+                        <label for="pdfUpload" class="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold cursor-pointer hover:bg-purple-700 transition inline-block">
+                            Choose File
+                        </label>
+                        <p class="text-sm text-gray-500 mt-2">Max file size: 10MB</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chat Interface -->
+        <section class="max-w-4xl mx-auto">
+            <div class="card-gradient rounded-2xl overflow-hidden shadow-xl">
+                <div class="bg-gradient-to-r from-purple-600 to-purple-800 text-white p-6">
+                    <h3 class="text-xl font-semibold">Ask Questions About Your Document</h3>
+                    <p class="text-purple-200">The AI assistant is ready to help you understand your material</p>
+                </div>
+                
+                <div class="p-6">
+                    <!-- Chat Messages -->
+                    <div id="chatContainer" class="h-96 overflow-y-auto mb-4 space-y-4 p-4 bg-gray-50 rounded-lg">
+                        <div class="ai-bubble chat-bubble fade-in">
+                            <div class="flex items-start space-x-2">
+                                <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-robot text-white text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-700">StudyMate AI</p>
+                                    <p class="text-gray-600">Hello! I'm your AI study assistant. Upload a PDF document and I'll help you understand its content through interactive Q&A.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Sample questions -->
+                        <div class="text-center text-sm text-gray-500 my-4">
+                            <p>Try asking:</p>
+                            <div class="flex flex-wrap justify-center gap-2 mt-2">
+                                <button onclick="askQuestion('What is the main topic of this document?')" class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs hover:bg-gray-200 transition">
+                                    What is the main topic?
+                                </button>
+                                <button onclick="askQuestion('Summarize the key points')" class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs hover:bg-gray-200 transition">
+                                    Summarize key points
+                                </button>
+                                <button onclick="askQuestion('Explain the most important concept')" class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs hover:bg-gray-200 transition">
+                                    Explain important concept
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Input Area -->
+                    <div class="flex space-x-3">
+                        <input 
+                            type="text" 
+                            id="questionInput" 
+                            placeholder="Ask a question about your document..." 
+                            class="flex-1 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            disabled
+                        >
+                        <button 
+                            id="askButton" 
+                            class="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled
+                        >
+                            <i class="fas fa-paper-plane mr-2"></i>Ask
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="mt-16">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">Powerful Features for Students</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="card-gradient rounded-xl p-6 text-center">
+                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-brain text-purple-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">AI-Powered Understanding</h3>
+                    <p class="text-gray-600">Advanced AI analyzes your documents and provides accurate, contextual answers to your questions.</p>
+                </div>
+                
+                <div class="card-gradient rounded-xl p-6 text-center">
+                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-search text-purple-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Smart Document Analysis</h3>
+                    <p class="text-gray-600">Extract key concepts, summaries, and important information from complex academic materials.</p>
+                </div>
+                
+                <div class="card-gradient rounded-xl p-6 text-center">
+                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-comments text-purple-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Interactive Learning</h3>
+                    <p class="text-gray-600">Engage in natural conversations about your study materials to deepen your understanding.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-16 py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">StudyMate</h4>
+                    <p class="text-gray-400">Your AI-powered study companion for smarter learning and better understanding.</p>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Features</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">PDF Analysis</a></li>
+                        <li><a href="#" class="hover:text-white transition">Q&A System</a></li>
+                        <li><a href="#" class="hover:text-white transition">Study Assistance</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Resources</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">Documentation</a></li>
+                        <li><a href="#" class="hover:text-white transition">Tutorials</a></li>
+                        <li><a href="#" class="hover:text-white transition">API</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Connect</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center hover:bg-purple-600 transition">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center hover:bg-purple-600 transition">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center hover:bg-purple-600 transition">
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 StudyMate. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // DOM Elements
+        const pdfUpload = document.getElementById('pdfUpload');
+        const uploadArea = document.getElementById('uploadArea');
+        const questionInput = document.getElementById('questionInput');
+        const askButton = document.getElementById('askButton');
+        const chatContainer = document.getElementById('chatContainer');
+        
+        // Sample responses for demonstration
+        const sampleResponses = {
+            'What is the main topic of this document?': 'Based on my analysis, this document appears to be about machine learning fundamentals, covering topics such as supervised learning, neural networks, and data preprocessing techniques. The main focus is on providing a comprehensive introduction to AI concepts for beginners.',
+            'Summarize the key points': 'The key points in this document include: 1) Introduction to artificial intelligence and its applications, 2) Detailed explanation of machine learning algorithms, 3) Discussion on neural network architectures, 4) Data preprocessing and feature engineering techniques, and 5) Ethical considerations in AI development.',
+            'Explain the most important concept': 'The most important concept discussed is "Supervised Learning." This involves training algorithms on labeled datasets where both input data and corresponding outputs are provided. The model learns to map inputs to outputs and can then make predictions on new, unseen data. This forms the foundation for many practical AI applications.',
+            'What are the applications mentioned?': 'The document mentions several applications including image recognition systems, natural language processing for chatbots, predictive analytics in healthcare, autonomous vehicles, and recommendation systems used by streaming services and e-commerce platforms.',
+            'How does neural network work?': 'Neural networks work by simulating the human brain\'s neural connections. They consist of layers of interconnected nodes (neurons) that process information. Each connection has a weight that adjusts during training, allowing the network to learn complex patterns and make accurate predictions through forward and backward propagation processes.'
+        };
+        
+        // Default response for unknown questions
+        const defaultResponse = 'I\'ve analyzed your document and found it contains technical academic content. Could you please clarify which specific aspect you\'d like me to focus on? I can provide detailed explanations about concepts, summaries, or help with understanding complex topics.';
+        
+        // Handle file upload
+        pdfUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type === 'application/pdf') {
+                // Simulate file processing
+                uploadArea.innerHTML = `
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-check text-green-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-2">Document Uploaded Successfully!</h3>
+                        <p class="text-gray-600 mb-2">${file.name}</p>
+                        <p class="text-sm text-green-600">Ready for analysis</p>
+                    </div>
+                `;
+                
+                // Enable chat functionality
+                questionInput.disabled = false;
+                askButton.disabled = false;
+                
+                // Add success message to chat
+                addMessage('ai', 'Great! I\'ve successfully analyzed your PDF document. I\'m now ready to answer your questions about its content. What would you like to know?');
+            } else {
+                alert('Please upload a valid PDF file.');
+            }
+        });
+        
+        // Enable ask button when typing
+        questionInput.addEventListener('input', function() {
+            askButton.disabled = !this.value.trim();
+        });
+        
+        // Handle asking questions
+        askButton.addEventListener('click', function() {
+            const question = questionInput.value.trim();
+            if (question) {
+                askQuestion(question);
+            }
+        });
+        
+        // Allow pressing Enter to ask
+        questionInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !askButton.disabled) {
+                askButton.click();
+            }
+        });
+        
+        // Function to ask a question
+        function askQuestion(question) {
+            addMessage('user', question);
+            questionInput.value = '';
+            askButton.disabled = true;
+            
+            // Simulate AI thinking
+            const thinkingMessage = addThinkingMessage();
+            
+            // Simulate AI response after delay
+            setTimeout(() => {
+                removeThinkingMessage(thinkingMessage);
+                const response = sampleResponses[question] || defaultResponse;
+                addMessage('ai', response);
+            }, 1500);
+        }
+        // Add a message to the chat
+        function addMessage(sender, text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = ${sender === 'user' ? 'user-bubble' : 'ai-bubble'} chat-bubble fade-in;
+            
+            messageDiv.innerHTML = `
+                <div class="flex items-start space-x-2">
+                    <div class="w-8 h-8 ${sender === 'user' ? 'bg-white' : 'bg-purple-600'} rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="${sender === 'user' ? 'fas fa-user text-purple-600' : 'fas fa-robot text-white'} text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium ${sender === 'user' ? 'text-white' : 'text-gray-700'}">${sender === 'user' ? 'You' : 'StudyMate AI'}</p>
+                        <p class="${sender === 'user' ? 'text-white' : 'text-gray-600'}">${text}</p>
+                    </div>
+                </div>
+            `;
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            return messageDiv;
+        }
+        
+        // Add thinking indicator
+        function addThinkingMessage() {
+            const thinkingDiv = document.createElement('div');
+            thinkingDiv.className = 'ai-bubble chat-bubble';
+            thinkingDiv.id = 'thinking-message';
+            
+            thinkingDiv.innerHTML = `
+                <div class="flex items-start space-x-2">
+                    <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-robot text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-700">StudyMate AI</p>
+                        <div class="typing-indicator">
+                            <span class="typing-dot"></span>
+                            <span class="typing-dot"></span>
+                            <span class="typing-dot"></span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            chatContainer.appendChild(thinkingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            return thinkingDiv;
+        }
+        
+        // Remove thinking indicator
+        function removeThinkingMessage(thinkingElement) {
+            if (thinkingElement && thinkingElement.parentNode) {
+                thinkingElement.parentNode.removeChild(thinkingElement);
+            }
+        }
+        
+        // Drag and drop functionality
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#667eea';
+            this.style.backgroundColor = '#f7fafc';
+        });
+        
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#cbd5e0';
+            this.style.backgroundColor = '';
+        });
+        
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#cbd5e0';
+            this.style.backgroundColor = '';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                pdfUpload.files = files;
+                const event = new Event('change');
+                pdfUpload.dispatchEvent(event);
+            }
+        });
+        
+        // Click anywhere on upload area to trigger file input
+        uploadArea.addEventListener('click', function() {
+            pdfUpload.click();
+        });
+    </script>
+</body>
+</html>
